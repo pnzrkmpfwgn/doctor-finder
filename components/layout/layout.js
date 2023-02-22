@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
 import { IntlProvider,FormattedMessage } from "react-intl";
 import LayoutContext from "./layoutContext";
-
+import { useSelector, useDispatch } from "react-redux";
+import { setLanguage,setLangCookie } from "../../redux/theme";
+import {useCookies} from 'react-cookie';
 
 const message = {
   en:{
@@ -22,7 +24,6 @@ const message = {
 
 
 //Using Redux reducers at the top of the component tree
-//import { useSelector, useDispatch } from "react-redux";
 //import {increment,decrement,incrementByAmount} from '../../redux/counter'
 
 //Might be useful for later
@@ -31,9 +32,9 @@ const message = {
 
 
 export default function Layout({ children }) {
+  const [cookie, setCookie] = useCookies(["lang"])
     //Get the global state
-   // const count = useSelector(state => state.counter.value)
-   // const dispatch = useDispatch()
+   
     //using dispatch function to dispatch actions
     
 
@@ -54,31 +55,38 @@ export default function Layout({ children }) {
   //   };
   // }, []);
 
-  const [locale, setLocale] = useState('en');
+  const language = useSelector(state => state.theme.language)
+  const dispatch = useDispatch()
 
+  useEffect(()=>{
+    if(cookie.lang){
+      dispatch(setLanguage(cookie.lang))
+    }else if(navigator.language){
+      let ln = navigator.language.split("-")
+      dispatch(setLanguage(ln[0]))
+      setCookie("lang",ln[0])
+    }
+  },[cookie, dispatch, setCookie])
+  
   const handleChange = (e) => {
-    setLocale(e.target.value);
+    dispatch(setLanguage(e.target.value))
+    setCookie("lang",e.target.value)
   };
 
   return (
     <>
-    <LayoutContext.Provider value={{locale}} >
+    <LayoutContext.Provider value={language} >
     <select onChange={handleChange}>
       {['en','tr'].map((x)=>(
         <option value={x} key={x}>{x}</option>
       ))}
     </select>
-    <IntlProvider locale={locale} messages={message[locale]} >
-    <Header title={<FormattedMessage id="heading" defaultMessage="Default" values={{locale}} />} />
-     {/* Example for how to use @reduxjs/toolkit */}
-     {/* <button onClick={()=> dispatch(increment())} >Increment</button>
-     <button onClick={()=> dispatch(decrement())} >Decrement</button>
-     <button onClick={()=> dispatch(incrementByAmount(5))} >Increment by 5</button>
-     {count}  */}
+    <IntlProvider locale={language} messages={message[language]} >
+    <Header title={<FormattedMessage id="heading" defaultMessage="Default" values={{language}} />} />
      <main title="Main">
        {children}
      </main>
-     <Footer footer_title={<FormattedMessage id="heading" defaultMessage="Default" values={{locale}} />} />
+     <Footer footer_title={<FormattedMessage id="heading" defaultMessage="Default" values={{language}} />} />
     </IntlProvider>
     </LayoutContext.Provider>
     </>
