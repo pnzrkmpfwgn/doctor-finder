@@ -1,6 +1,7 @@
 import App from "next/app";
 import Router from "next/router";
 import Layout from "../components/layout/layout";
+import { CookiesProvider } from "react-cookie";
 
 
 
@@ -42,9 +43,11 @@ class MyApp extends App {
     return (
       <>
         <Provider store={store} >
-        <Layout>
-              <Component {...pageProps} key={router.route} />
-        </Layout>
+        <CookiesProvider>
+          <Layout>
+                <Component {...pageProps} key={router.route} />
+          </Layout>
+        </CookiesProvider>
         </Provider>
       </>
     );
