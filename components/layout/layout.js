@@ -4,23 +4,10 @@ import Footer from "../footer/Footer";
 import { IntlProvider,FormattedMessage } from "react-intl";
 import LayoutContext from "./layoutContext";
 import { useSelector, useDispatch } from "react-redux";
-import { setLanguage,setLangCookie } from "../../redux/theme";
+import { setLanguage } from "../../redux/theme";
 import {useCookies} from 'react-cookie';
+import {message} from '../../data/langData';
 
-const message = {
-  en:{
-    heading:"Heading",
-    heading_main_menu:"Demo Main Menu",
-    title:"Title",
-    footer:"Footer",
-  },
-  tr:{
-    heading:"Başlık",
-    heading_main_menu:"Demo Anasayfa",
-    title:"Başlık",
-    footer:"Alt kısım"
-  }
-}
 
 
 //Using Redux reducers at the top of the component tree
@@ -31,7 +18,7 @@ const message = {
 //
 
 
-export default function Layout({ children }) {
+export default function Layout(props) {
   const [cookie, setCookie] = useCookies(["lang"])
     //Get the global state
    
@@ -72,7 +59,6 @@ export default function Layout({ children }) {
     dispatch(setLanguage(e.target.value))
     setCookie("lang",e.target.value)
   };
-
   return (
     <>
     <LayoutContext.Provider value={language} >
@@ -84,9 +70,10 @@ export default function Layout({ children }) {
     <IntlProvider locale={language} messages={message[language]} >
     <Header title={<FormattedMessage id="heading" defaultMessage="Default" values={{language}} />} />
      <main title="Main">
-       {children}
+       {props.children}
      </main>
      <Footer footer_title={<FormattedMessage id="heading" defaultMessage="Default" values={{language}} />} />
+    
     </IntlProvider>
     </LayoutContext.Provider>
     </>
