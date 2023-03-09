@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import {useAuth,logOut} from '../../firebase/firebase';
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
 import { IntlProvider,FormattedMessage } from "react-intl";
@@ -7,7 +8,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { setLanguage } from "../../redux/theme";
 import {useCookies} from 'react-cookie';
 import {message} from '../../data/langData';
-
+import Link from 'next/link';
+import { useRouter} from 'next/router';
+import {setLoading} from '../../redux/authentication';
 
 
 //Using Redux reducers at the top of the component tree
@@ -20,6 +23,15 @@ import {message} from '../../data/langData';
 
 export default function Layout(props) {
   const [cookie, setCookie] = useCookies(["lang"])
+
+  // const loading = useSelector(state => state.auth.loading);
+  const language = useSelector(state => state.theme.language)
+  const dispatch = useDispatch();
+
+  const router = useRouter();
+
+  const user = useAuth();
+  console.log(user);
     //Get the global state
    
     //using dispatch function to dispatch actions
@@ -42,9 +54,6 @@ export default function Layout(props) {
   //   };
   // }, []);
 
-  const language = useSelector(state => state.theme.language)
-  const dispatch = useDispatch()
-
   useEffect(()=>{
     if(cookie.lang){
       dispatch(setLanguage(cookie.lang))
@@ -55,6 +64,16 @@ export default function Layout(props) {
     }
   },[cookie, dispatch, setCookie])
   
+  async function handleLogout(){
+    setLoading(true);
+    try{
+      logOut()
+    }catch(error){
+      alert(error);
+    }
+    router.push("/")
+  }
+
   const handleChange = (e) => {
     dispatch(setLanguage(e.target.value))
     setCookie("lang",e.target.value)
@@ -67,7 +86,18 @@ export default function Layout(props) {
         <option value={x} key={x}>{x}</option>
       ))}
     </select>
+   
     <IntlProvider locale={language} messages={message[language]} >
+    {user ? <button onClick={handleLogout} ><FormattedMessage id="logout_button" defaultMessage="Default" values={{language}} ></FormattedMessage></button> 
+    : <div>
+    <Link href="/patient-sign-up" ><FormattedMessage id="patient_sign_up_link"/></Link> <br/> 
+    <Link href="/doctor-sign-up" ><FormattedMessage id="doctor_sign_up_link"/></Link> <br/>
+    <Link href="/patient-login" ><FormattedMessage id="patient_login_link"/></Link> <br/>
+    <Link href="/doctor-login" ><FormattedMessage id="doctor_login_link"/></Link> <br/>
+    </div>
+    
+    }
+
     <Header title={<FormattedMessage id="heading" defaultMessage="Default" values={{language}} />} />
      <main title="Main">
        {props.children}

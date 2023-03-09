@@ -4,15 +4,19 @@ import { useSelector, useDispatch } from "react-redux";
 import {setLoading} from '../redux/authentication';
 import { IntlProvider,FormattedMessage } from "react-intl";
 import {message} from '../data/langData';
+import {useRouter} from 'next/router';
 
 const SignUp = () => {
     const loading = useSelector(state => state.auth.loading);
     const language = useSelector(state => state.theme.language)
     const dispatch = useDispatch();
 
+    const router = useRouter();
+
     const emailRef = useRef();
     const passwordRef = useRef();
     const currentUser = useAuth();
+    console.log(currentUser)
 
     async function handleSignUp(){
         dispatch(setLoading(true))
@@ -22,12 +26,13 @@ const SignUp = () => {
           alert("Error!")
         }
         dispatch(setLoading(false))
+        router.push("/patient-edit-profile")
       }
       
     return <IntlProvider locale={language} messages={message[language]} >
       <div>
       <div id="fields" >
-      <input ref={emailRef} placeholder='Email' />
+      <input ref={emailRef} placeholder='Email' type="email" />
       <input ref={passwordRef} type="password" placeholder='Password' />
       </div>
       <button disabled={loading || currentUser !== null} onClick={handleSignUp}><FormattedMessage id="signup" defaultMessage="Default" values={{language}} /></button>
